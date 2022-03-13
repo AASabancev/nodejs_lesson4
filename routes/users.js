@@ -56,7 +56,6 @@ router.delete('/:id', function(req, res, next) {
 router.patch('/:id/permission', function(req, res, next) {
 
    const toUpdate = { permission: req.body };
-   console.log('toUpdate',toUpdate ) ;
   User.findByIdAndUpdate(req.params.id, toUpdate, function(err, user){
      if(err) {
         return res.json({

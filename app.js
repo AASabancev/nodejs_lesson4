@@ -78,7 +78,6 @@ passport.use(new JWTStrategy({
   secretOrKey: "jwt_secret"
 }, (jwt_paylod, done) => {
 
-  console.log('jwt_paylod.user', jwt_paylod.user)
   User.findById(jwt_paylod.user._id, ( err, user ) => done(err, user))
 }))
 
