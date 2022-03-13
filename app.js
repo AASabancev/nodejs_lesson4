@@ -104,10 +104,13 @@ app.use('/api/news', apiNewsRouter);
 app.use('/socket.io', apiSocket);
 app.use('/api', apiRouter);
 
-app.use(express.static(path.join(__dirname, "public/build")));
-
+let folder = "/public/build_local";
+if(process.env.NODE_ENV=='production') {
+  folder = "/public/build_heroku";
+}
+app.use(express.static(path.join(__dirname, folder)));
 app.get("*", (req, res) => {
-  return res.sendFile(path.join(__dirname + "/public/build/index.html"))
+  return res.sendFile(path.join(__dirname + folder + "/index.html"))
 })
 
 
