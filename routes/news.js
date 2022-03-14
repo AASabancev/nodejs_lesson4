@@ -10,9 +10,7 @@ router.get('/', function(req, res, next) {
   News.find()
      .populate('user', 'firstName image middleName surName username')
      .then(function(news){
-       res.json({
-         news
-       });
+       res.status(200).json(news);
      })
      .catch(function(err){
        res.json({
@@ -53,9 +51,7 @@ router.post('/', passport.authenticate("jwt", { session: false }), function(req,
          News.find()
             .populate('user', 'firstName image middleName surName username')
             .then(function(news){
-              res.json({
-                news
-              });
+               res.status(200).json(news);
             })
             .catch(function(err){
               res.json({
@@ -91,9 +87,7 @@ router.patch('/:id', function(req, res, next) {
       News.find()
          .populate('user', 'firstName image middleName surName username')
          .then(function(news){
-           res.json({
-             news
-           });
+            res.status(200).json(news);
          })
          .catch(function(err){
            res.json({
@@ -118,7 +112,7 @@ router.delete('/:id', function(req, res, next) {
       News.find()
          .populate('user', 'firstName image middleName surName username')
          .then(function(news){
-           res.status(200).json(news);
+            res.status(200).json(news);
          })
          .catch(function(err){
            res.json({

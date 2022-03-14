@@ -42,7 +42,6 @@ async function findAccessToken(user, token) {
       accessToken: token
     };
 
-    console.log('search', search);
     Token.findOne(search, "accessToken refreshToken accessTokenExpiredAt refreshTokenExpiredAt")
        .then(function (token) {
          resolve(token);
