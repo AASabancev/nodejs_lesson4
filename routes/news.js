@@ -118,9 +118,7 @@ router.delete('/:id', function(req, res, next) {
       News.find()
          .populate('user', 'firstName image middleName surName username')
          .then(function(news){
-           res.json({
-             news
-           });
+           res.status(200).json(news);
          })
          .catch(function(err){
            res.json({

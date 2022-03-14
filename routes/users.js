@@ -7,9 +7,7 @@ const User = require( path.join(process.cwd(), 'models','User.js') );
 router.get('/', function(req, res, next) {
   User.find()
      .then(function(users){
-       res.json({
-          data: users
-       });
+       res.json(users);
      })
      .catch(function(err){
        res.json({

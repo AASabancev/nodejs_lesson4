@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcrypt");
+const path = require("path");
+
+const ModelIncrement = require( path.join(process.cwd(), 'models','ModelIncrement.js') );
 
 const SALT_WORK_FACTOR = 10;
 
 const userScheme = new Schema({
-	// id: new mongoose.Types.ObjectId(),
+	id: Number,
 	firstName: String,
 	image: String,
 	middleName: String,
@@ -35,7 +38,7 @@ const userScheme = new Schema({
 });
 
 userScheme.pre('save', async function (next) {
-	console.log('pre save', this);
+
 	const user = this;
 	if (!user.isModified("password")) return next();
 
@@ -43,6 +46,12 @@ userScheme.pre('save', async function (next) {
 	if(newHash){
 		user.password = newHash
 	}
+
+	if (this.isNew) {
+		const id = await ModelIncrement.getNextId('User');
+		this.id = id; // Incremented
+	}
+
 	next();
 })
 
