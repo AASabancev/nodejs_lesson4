@@ -17,7 +17,7 @@ const ExtractJWT = passportJWT.ExtractJwt;
 var apiUsersRouter = require('./routes/users');
 var apiNewsRouter = require('./routes/news');
 var apiRouter = require('./routes/api');
-var apiSocket = require('./routes/socket');
+// var apiSocketRouter = require('./routes/socket');
 
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -25,11 +25,6 @@ mongoose.connect("mongodb+srv://testlesson:HXiRwoxDlnxUEYECOLet@cluster0.h2uda.m
 
 const User = require( path.join(process.cwd(), 'models','User.js') );
 
-// const connection = mongoose.connection;
-//
-// connection.once("open", function () {
-//   console.log("MongDB connected successfully.")
-// })
 
 
 var app = express();
@@ -101,7 +96,7 @@ app.use(function(req, res, next) {
 
 app.use('/api/users', apiUsersRouter);
 app.use('/api/news', apiNewsRouter);
-app.use('/socket.io', apiSocket);
+// app.use('/socket.io', apiSocketRouter);
 app.use('/api', apiRouter);
 
 let folder = "/public/build_local";

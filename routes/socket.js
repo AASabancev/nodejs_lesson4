@@ -3,11 +3,15 @@ var path = require('path');
 var router = express.Router();
 
 
-router.post('/', function(req, res, next) {
-   res.json({
-      text: "hello"
-   });
-});
+const clients = [];
+
+// router.get('/*', function(req, res, next) {
+// 	res.body('');
+// });
+//
+// router.post('/*', function(req, res, next) {
+// 	res.body('');
+// });
 
 
 module.exports = router;
