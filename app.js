@@ -17,7 +17,6 @@ const ExtractJWT = passportJWT.ExtractJwt;
 var apiUsersRouter = require('./routes/users');
 var apiNewsRouter = require('./routes/news');
 var apiRouter = require('./routes/api');
-// var apiSocketRouter = require('./routes/socket');
 
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -96,7 +95,6 @@ app.use(function(req, res, next) {
 
 app.use('/api/users', apiUsersRouter);
 app.use('/api/news', apiNewsRouter);
-// app.use('/socket.io', apiSocketRouter);
 app.use('/api', apiRouter);
 
 let folder = "/public/build_local";
