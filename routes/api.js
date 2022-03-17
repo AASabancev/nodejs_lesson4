@@ -6,6 +6,7 @@ const passport = require("passport")
 const jwt = require("jsonwebtoken")
 const formidable = require('formidable')
 var router = express.Router();
+var Jimp = require('jimp');
 
 const User = require( path.join(process.cwd(), 'models','User.js') );
 const Token = require( path.join(process.cwd(), 'models','Token.js') );
@@ -13,7 +14,9 @@ const fs = require("fs");
 const bcrypt = require("bcrypt");
 
 const JWT_SECRET = "jwt_secret";
-
+const POSTFIX_THUMB = '_thumb';
+const POSTFIX_FULL = '_full';
+const PATH_UPLOAD = path.join('./public', 'upload','images');
 
 const authMiddleware = (req, res, next) => {
   passport.authenticate('jwt', {session: false}, (err, user) => {
@@ -225,6 +228,27 @@ router.get('/profile', authMiddleware, function(req, res, next) {
   })
 });
 
+/**
+ * Чтобы не дублировать переменные для FULL и THUMB, сделаем функцию возврата имени с постфиксом и расширением
+ * @param fileName название файла
+ * @param postfix постфикс добавляемый к названию файла до расширения
+ * @param ext расширение файла
+ * @returns {string} название файла
+ */
+const getFileName = (fileName, postfix = POSTFIX_FULL, ext) => {
+  return fileName + postfix + ext;
+}
+
+/**
+ * Чтобы не дублировать переменные для FULL и THUMB, сделаем функцию возврата путь
+ * @param fileName название файла
+ * @param postfix постфикс добавляемый к названию файла до расширения
+ * @param ext расширение файла
+ * @returns {string} путь к файлу
+ */
+const getFilePath = (fileName, postfix = POSTFIX_FULL, ext) => {
+  return path.join(process.cwd(), PATH_UPLOAD, getFileName(fileName, postfix, ext));
+}
 
 router.patch('/profile', authMiddleware, function(req, res, next) {
   if(!req.user) {
@@ -234,10 +258,9 @@ router.patch('/profile', authMiddleware, function(req, res, next) {
   }
 
   const form = new formidable.IncomingForm()
-  const upload = path.join('./public', 'upload','images');
 
-  if (!fs.existsSync(upload)) {
-    fs.mkdirSync(upload, {recursive: true});
+  if (!fs.existsSync(PATH_UPLOAD)) {
+    fs.mkdirSync(PATH_UPLOAD, {recursive: true});
   }
 
   form.parse(req, async function (err, fields, files) {
@@ -264,21 +287,53 @@ router.patch('/profile', authMiddleware, function(req, res, next) {
       }
     }
 
-
     delete(dataUser.avatar);
     if (files.avatar && files.avatar.filepath) {
 
-      console.log('files.avatar', files.avatar)
+      /**
+       * Удаляем старые аватары
+       * @type {string}
+       */
+      const oldAvatar = path.join('./public', req.user.image);
+      const oldAvatar_full = oldAvatar.replace('_thumb','_full');
+      for ( const file of [oldAvatar, oldAvatar_full] ){
+        if(fs.existsSync(file)) {
+          fs.unlinkSync(file);
+        }
+      }
+
       const fileName = chance.string({
         pool: 'qwertyuiopasdfghjklzxcvbnm',
         length: 15
-      }) + path.extname(files.avatar.originalFilename);
-      const filePath = path.join(process.cwd(), upload, fileName);
-      dataUser.image = `/upload/images/${fileName}`;
-      fs.copyFile(files.avatar.filepath, filePath, function (err) {
-
       });
+
+      const ext = path.extname(files.avatar.originalFilename);
+
+      await fs.copyFileSync(files.avatar.filepath, getFilePath(fileName, POSTFIX_FULL, ext));
+
+      /**
+       * создаем квадратную фотографию
+       */
+
+      dataUser.image = `/upload/images/${getFileName(fileName, POSTFIX_THUMB, ext)}`;
+      await Jimp.read(getFilePath(fileName, POSTFIX_FULL, ext))
+         .then(imageResource => {
+           return imageResource
+              .resize(256, 256) // resize
+              .quality(60) // set JPEG quality
+              .greyscale() // set greyscale
+              .write(getFilePath(fileName, POSTFIX_THUMB, ext)); // save
+         })
+         .catch(err => {
+           console.log('error Jimp', err)
+           /**
+            * Если вышла ошибка, можем сохранить большое фото без ресайза
+            */
+           dataUser.image = `/upload/images/${getFileName(fileName, POSTFIX_FULL, ext)}`;
+         });
+
     }
+
     delete(dataUser.oldPassword);
     delete(dataUser.newPassword);
     const userOrError = await updateUser(req.user, dataUser)
