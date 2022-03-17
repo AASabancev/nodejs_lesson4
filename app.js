@@ -22,7 +22,7 @@ var apiSocketRouter = require('./routes/socket');
 
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-mongoose.connect("mongodb+srv://testlesson:HXiRwoxDlnxUEYECOLet@cluster0.h2uda.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+mongoose.connect(process.env.NODE_ENV=='production' ? process.env.DB_PRODUCTION : process.env.DB_DEVELOP)
 
 const User = require( path.join(process.cwd(), 'models','User.js') );
 
